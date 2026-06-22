@@ -2,19 +2,6 @@ name: Run Data Sync
 
 on:
   workflow_dispatch:
-    inputs:
-      strava_client_id:
-        description: 'Strava Client ID'
-        required: false
-        default: ''
-      strava_client_secret:
-        description: 'Strava Client Secret'
-        required: false
-        default: ''
-      strava_refresh_token:
-        description: 'Strava Refresh Token'
-        required: false
-        default: ''
   schedule:
     - cron: '0 0 * * *'
   push:
@@ -127,14 +114,8 @@ jobs:
 
       - name: Run sync Strava script
         if: env.RUN_TYPE == 'strava'
-        env:
-          _CID: ${{ github.event.inputs.strava_client_id || secrets.STRAVA_CLIENT_ID }}
-          _CSECRET: ${{ github.event.inputs.strava_client_secret || secrets.STRAVA_CLIENT_SECRET }}
-          _RTOKEN: ${{ github.event.inputs.strava_refresh_token || secrets.STRAVA_CLIENT_REFRESH_TOKEN }}
         run: |
-          echo "::add-mask::$_CSECRET"
-          echo "::add-mask::$_RTOKEN"
-          python run_page/strava_sync.py "$_CID" "$_CSECRET" "$_RTOKEN"
+          python run_page/strava_sync.py ${{ secrets.STRAVA_CLIENT_ID }} ${{ secrets.STRAVA_CLIENT_SECRET }} ${{ secrets.STRAVA_CLIENT_REFRESH_TOKEN }}
         # If you only want to sync `type running` add args --only-run, default script is to sync all data (rides and runs).
 
       - name: Run sync Codoon script
