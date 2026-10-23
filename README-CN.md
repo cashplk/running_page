@@ -195,7 +195,7 @@ R.I.P. 希望大家都能健康顺利的跑过终点，逝者安息。
 git clone https://github.com/yihong0618/running_page.git --depth=1
 ```
 
-## 安装及测试 (node >= 20 python >= 3.11)
+## 安装及测试 (node >= 20 python >= 3.12)
 
 ```bash
 pip3 install -r requirements.txt
@@ -204,6 +204,32 @@ pnpm develop
 ```
 
 访问 <http://localhost:5173/> 查看
+
+## Strava 网页同步（Web 同步）
+
+> 当 Strava API 应用处于 `inactive` 状态（OAuth2 请求全部返回 403）时，可以用网页端接口同步数据。
+
+```bash
+# 本地同步（拉最近 7 天）
+python run_page/strava_web_sync.py <JWT> --days 7
+
+# 只同步跑步
+python run_page/strava_web_sync.py <JWT> --days 7 --only-run
+```
+
+**JWT 获取方式**：
+
+1. 浏览器登录 [strava.com](https://www.strava.com)
+2. F12 打开开发者工具 → Application → Cookies → `https://www.strava.com`
+3. 复制 `strava_remember_token` 的 Value（一长串 `eyJ...` 的 JWT）
+
+**CI 接入**：
+
+- 在 workflow 的 `RUN_TYPE` 中选择 `strava_web`
+- 配置 GitHub Secret：`STRAVA_JWT`（JWT 值）
+- 可选 Variable：`STRAVA_WEB_DAYS`（默认 7）
+
+> ⚠️ JWT 约 30 天过期，过期后需重新从浏览器复制更新 `STRAVA_JWT`。
 
 ## TUI（终端界面）
 
@@ -402,6 +428,19 @@ IGNORE_BEFORE_SAVING = 1
 
 > 你可以使用`
 Google Maps` 的 [互动式多段线编码器实用程序](https://developers.google.com/maps/documentation/utilities/polylineutility)，来制作你的 `IGNORE_POLYLINE`。如果你在中国，请使用卫星图制作，避免火星坐标漂移。
+
+### 室内运动路线
+
+缺少 GPS 的活动会保留原有的路线、活动子类型和位置信息。
+在仪表盘或经典地图中选中此类活动时，地图会显示该活动之前最近一次具有有效 GPS
+轨迹的活动，并提示所显示路线的来源。如果此前没有有效轨迹，则不显示替代路线。
+此回退仅用于展示，不会改变活动距离、导出数据或数据库。配置的隐私过滤仍然会应用于导出路线。
+
+从数据库生成 SVG 海报时，网格布局会跳过所存路线为空字符串或 NULL 的活动。
+其他布局仍将这些活动的日期和距离计入统计，不会使用前端的替代路线。
+
+已存入 `run_page/data.db` 的生成路线无法可靠地与原始路线区分。
+如需替换这些路线，请重新导入原始活动数据。
 
 ## 下载数据到本地
 
@@ -608,7 +647,7 @@ python run_page/tulipsport_sync.py nLgy****RyahI
 
 - 如果你想同步 `fit` 格式，增加命令 --fit
 
-- 如果你使用 Garmin 作为数据源建议您将代码拉取到本地获取 Garmin 国际区的密钥，注意**Python 版本必须>=3.8**
+- 如果你使用 Garmin 作为数据源建议您将代码拉取到本地获取 Garmin 国际区的密钥，注意**Python 版本必须>=3.12**
 
 #### 获取佳明国际区的密钥
 
@@ -641,7 +680,7 @@ python run_page/garmin_sync.py xxxxxxxxxxx
 - 如果你只想同步跑步数据请增加 --only-run
 - 如果你想同步 `tcx` 格式，增加命令 --tcx
 - 如果你想同步 `fit` 格式，增加命令 --fit
-- 如果你使用 Garmin 作为数据源建议您将代码拉取到本地获取 Garmin 国际区的密钥，注意**Python 版本必须>=3.10**
+- 如果你使用 Garmin 作为数据源建议您将代码拉取到本地获取 Garmin 国际区的密钥，注意**Python 版本必须>=3.12**
 
 #### 获取佳明 CN 的密钥
 
@@ -680,7 +719,7 @@ python run_page/garmin_sync.py xxxxxxxxxx --is-cn --only-run
 <br>
 
 - 如果你只想同步 `type running` 使用参数 --only-run
-  **The Python version must be >=3.10**
+  **The Python version must be >=3.12**
 
 #### 获取佳明 CN 的密钥
 
@@ -1311,7 +1350,7 @@ python3 run_page/auto_share_sync.py --api_key xxxxxxxxx --base_url xxxxxxxx --da
 
 5. 下滑点击 `环境变量 (高级)`，并添加一个如下的变量：
 
-   > 变量名称 = `PYTHON_VERSION`, 值 = `3.11`
+   > 变量名称 = `PYTHON_VERSION`, 值 = `3.12`
 
 6. 点击 `保存并部署`，完成部署。
 

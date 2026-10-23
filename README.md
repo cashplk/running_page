@@ -185,7 +185,7 @@ Clone or fork the repo.
 git clone https://github.com/yihong0618/running_page.git --depth=1
 ```
 
-## Installation and testing (node >= 20 python >= 3.11)
+## Installation and testing (node >= 20 python >= 3.12)
 
 ```bash
 pip3 install -r requirements.txt
@@ -194,6 +194,32 @@ pnpm develop
 ```
 
 Open your browser and visit <http://localhost:5173/>
+
+## Strava Web Sync
+
+> For when your Strava API application is `inactive` (all OAuth2 requests return 403), you can sync activities through Strava's web endpoints instead.
+
+```bash
+# Sync locally (last 7 days by default)
+python run_page/strava_web_sync.py <JWT> --days 7
+
+# Runs only
+python run_page/strava_web_sync.py <JWT> --days 7 --only-run
+```
+
+**Getting the JWT:**
+
+1. Log in to [strava.com](https://www.strava.com) in your browser
+2. DevTools (F12) → Application → Cookies → `https://www.strava.com`
+3. Copy the value of `strava_remember_token` (a long `eyJ...` JWT)
+
+**CI setup:**
+
+- Set `RUN_TYPE` to `strava_web` in the workflow
+- Add GitHub Secret `STRAVA_JWT` (the JWT value)
+- Optional Variable `STRAVA_WEB_DAYS` (default: 7)
+
+> ⚠️ The JWT expires in ~30 days. Refresh `STRAVA_JWT` by re-copying it from the browser when it does.
 
 ## TUI (Terminal UI)
 
@@ -406,6 +432,22 @@ IGNORE_BEFORE_SAVING =
 
 You can using `Google map` [Interactive Polyline Encoder Utility](https://developers.google.com/maps/documentation/utilities/polylineutility), to making your `IGNORE_POLYLINE`.
 
+### Indoor routes
+
+Activities without GPS keep their original route, subtype and location data.
+When selected on the dashboard or classic map, they display the most recent
+earlier activity with a usable GPS route and a notice identifying that route.
+If no earlier mapped activity exists, no substitute route is shown. This fallback
+is only for display; it does not change activity distances, exports or the database.
+Configured privacy filters still apply to exported routes.
+
+For SVG posters generated from the database, the grid layout omits activities
+whose stored route is empty or NULL. Other layouts retain their dates and distances
+in activity totals; they do not borrow the frontend's substitute route.
+
+Previously generated routes already stored in `run_page/data.db` cannot reliably be
+distinguished from source routes. Reimport the original activity data to replace them.
+
 ## Download your running data
 
 > Download your running data and do not forget to [generate svg in `total` page](#total-data-analysis)
@@ -466,7 +508,7 @@ python run_page/fit_sync.py
 - If you only want `tcx` files add args --tcx
 - If you only want `fit` files add args --fit
 - If you are using Garmin as a data source, it is recommended that you pull the code to your local environment to run and obtain the Garmin secret.
-  **The Python version must be >=3.8**
+  **The Python version must be >=3.12**
 
 #### Get Garmin Secret
 
@@ -511,7 +553,7 @@ python run_page/garmin_sync.py xxxxxxxxxxxxxx(secret_string) --only-run
 - If you only want `tcx` files add args --tcx
 - If you only want `fit` files add args --fit
 - If you are using Garmin as a data source, it is recommended that you pull the code to your local environment to run and obtain the Garmin secret.
-  **The Python version must be >=3.10**
+  **The Python version must be >=3.12**
 
 #### Get Garmin CN Secret
 
@@ -551,7 +593,7 @@ python run_page/garmin_sync.py xxxxxxxxxxxxxx(secret_string)  --is-cn --only-run
 <br>
 
 - If you only want to sync `type running` add args --only-run
-  **The Python version must be >=3.10**
+  **The Python version must be >=3.12**
 
 #### Get Garmin CN Secret
 
@@ -1186,7 +1228,7 @@ For more display effects, see:
 
 5. Scroll down, click `Environment variables (advanced)`, then add a variable like the below:
 
-   > Variable name = `PYTHON_VERSION`, Value = `3.11`
+   > Variable name = `PYTHON_VERSION`, Value = `3.12`
 
 6. Click `Save and Deploy`
 
